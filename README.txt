@@ -49,17 +49,18 @@ These are liquid, large-cap, technology-oriented U.S. equities.
 ## Method Overview
 
 ### 1. Preprocessing
-- Load daily stock price data
+- Load daily stock data
 - Convert prices to daily log returns
 - Filter assets with too many missing values
 - Winsorize returns to reduce extreme outliers
 
 ### 2. Factor Removal
-Let \( R \in \mathbb{R}^{T \times N} \) be the return matrix.  
-Remove common factors via:
+Let \( R \in \mathbb{R}^{T \times N} \) be the return matrix. Remove common factors via:
+
 \[
 R = FB^\top + E
 \]
+
 where:
 - \(F\): common factors
 - \(B\): factor loadings
@@ -69,15 +70,18 @@ The residual matrix \(E\) is the main signal source for alpha construction.
 
 ### 3. Baseline Signal
 A rolling residual-reversal score is computed from the standardized residual return:
+
 \[
 s^{\mathrm{base}}_{t,i} = -\frac{e_{t,i}-\mu_{t,i}}{\sigma_{t,i}+\varepsilon}
 \]
 
 ### 4. Sparse Recovery in the DCT Domain
 For a rolling residual window \(x\), apply DCT:
+
 \[
 c = Dx
 \]
+
 Then recover a cleaner signal using:
 - **Soft Thresholding**
 - **OMP**
@@ -88,9 +92,11 @@ A transformer model is trained to predict **cross-sectional return structure** r
 
 ### 6. Portfolio Construction
 Signals are converted into demeaned, normalized long-short portfolio weights:
+
 \[
 w_{t,i} = \frac{\tilde s_{t,i}}{\sum_{j=1}^{N} |\tilde s_{t,j}|}
 \]
+
 and evaluated using next-period returns with transaction costs.
 
 ---
@@ -99,9 +105,11 @@ and evaluated using next-period returns with transaction costs.
 
 ### DCT + Thresholding
 Small transform coefficients are shrunk toward zero:
+
 \[
 \hat c_j = \mathrm{sign}(c_j)\max(|c_j|-\lambda,0)
 \]
+
 This is the simplest sparsity-based denoising method.
 
 ### DCT + OMP
@@ -109,9 +117,11 @@ OMP greedily selects the most important transform atoms one at a time and recons
 
 ### DCT + LASSO
 LASSO solves:
+
 \[
 \hat c = \arg\min_c \frac{1}{2}\|x-D^\top c\|_2^2 + \lambda\|c\|_1
 \]
+
 This is a convex sparsity-regularized recovery method.
 
 ---
@@ -204,3 +214,94 @@ Main insights:
 ├── transformer_signal.csv
 ├── final_alpha_comparison.m
 └── README.md
+```
+
+---
+
+## How to Run
+
+### MATLAB Sparse Recovery Pipeline
+Run the main project script:
+```matlab
+run_alpha_project
+```
+
+This will:
+- load stock data
+- compute returns
+- remove common factors
+- generate baseline and sparse signals
+- run backtests
+- report performance statistics
+- generate figures
+
+### Transformer Backtest
+Run:
+```matlab
+run_transformer_backtest
+```
+
+This will:
+- load the transformer-generated signal file
+- align it with the stock universe
+- run a long-short backtest
+- generate transformer performance figures
+
+### Final Combined Comparison
+Run:
+```matlab
+final_alpha_comparison
+```
+
+This compares:
+- baseline
+- DCT + Thresholding
+- DCT + OMP
+- DCT + LASSO
+- transformer
+
+---
+
+## Why This Project Matters
+
+This project connects course concepts from **compressed sensing and sparse recovery** to a practical financial application.
+
+It uses:
+- transform-domain sparsity
+- greedy recovery
+- convex recovery
+- residual signal modeling
+- sequence learning
+
+to study whether noisy financial residuals can be turned into better alpha signals.
+
+---
+
+## Future Improvements
+
+Possible next steps:
+- use a larger and more diverse stock universe
+- improve factor modeling
+- use walk-forward retraining
+- add regime detection
+- combine sparse-recovered signals with transformer inputs
+- test stronger transaction cost and turnover controls
+
+---
+
+## References
+
+Core topics behind this project include:
+- Discrete Cosine Transform
+- Compressed Sensing
+- OMP and LASSO
+- Statistical Arbitrage
+- Transformer-based Time Series Forecasting
+
+---
+
+## Author
+
+**Taewoon Choi**  
+Johns Hopkins University  
+Project: *Robust Alpha Signal Recovery Using Sparse Methods and Transformers*
